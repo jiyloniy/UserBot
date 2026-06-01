@@ -25,6 +25,8 @@ async def text_to_speech(
     voice_id: str = "JBFqnCBsd6RMkjVDRZzb",
     model_id: str = "eleven_multilingual_v2",
     output_format: str = "mp3_44100_128",
+    auto_enhance: bool = False,
+    openai_api_key: str = "",
 ) -> Optional[str]:
     """
     Matnni ElevenLabs API orqali ovozga aylantiradi.
@@ -35,6 +37,8 @@ async def text_to_speech(
         voice_id: Ovoz identifikatori (default: George)
         model_id: TTS model (default: eleven_multilingual_v2)
         output_format: Audio format (default: mp3_44100_128)
+        auto_enhance: True bo'lsa — matnni speech taglar bilan boyitadi
+        openai_api_key: Auto-enhance uchun OpenAI API kaliti
 
     Returns:
         Yaratilgan audio faylning yo'li yoki None (xato bo'lsa)
@@ -46,6 +50,11 @@ async def text_to_speech(
     if not api_key:
         logger.error("TTS: ELEVENLABS_API_KEY sozlanmagan")
         return None
+
+    # Auto-enhance: speech taglar qo'shish
+    if auto_enhance and openai_api_key:
+        from utils.tts_enhancer import enhance_text_for_tts
+        text = await enhance_text_for_tts(text, openai_api_key)
 
     url = ELEVENLABS_TTS_URL.format(voice_id=voice_id)
 

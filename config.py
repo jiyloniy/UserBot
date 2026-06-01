@@ -50,6 +50,7 @@ class Config:
     # ── ElevenLabs TTS ───────────────────────────────────────────
     ELEVENLABS_API_KEY: str = field(default_factory=lambda: _env_str("ELEVENLABS_API_KEY"))
     ELEVENLABS_VOICE_ID: str = field(default_factory=lambda: _env_str("ELEVENLABS_VOICE_ID", "JBFqnCBsd6RMkjVDRZzb"))
+    ELEVENLABS_AUTO_ENHANCE: bool = field(default_factory=lambda: _env_bool("ELEVENLABS_AUTO_ENHANCE", True))
 
     # ── Shaxsiy ma'lumotlar ───────────────────────────────────────
     OWNER_NAME: str = "Erkinjon Olimov"

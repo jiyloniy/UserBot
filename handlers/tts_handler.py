@@ -59,6 +59,8 @@ class TTSHandler:
             text=text,
             api_key=self.config.ELEVENLABS_API_KEY,
             voice_id=self.config.ELEVENLABS_VOICE_ID,
+            auto_enhance=self.config.ELEVENLABS_AUTO_ENHANCE,
+            openai_api_key=self.config.OPENAI_API_KEY,
         )
 
         if file_path and os.path.exists(file_path):
