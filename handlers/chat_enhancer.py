@@ -132,12 +132,12 @@ class ChatEnhancer:
                             hash=0,
                         )
                     )
+                    doc_map = {doc.id: doc for doc in full_set.documents}
                     for pack in full_set.packs:
-                        if emoji in pack.emoticon:
+                        if emoji in (pack.emoticon or ""):
                             for doc_id in pack.documents[:3]:
-                                for doc in full_set.documents:
-                                    if doc.id == doc_id:
-                                        matching_stickers.append(doc)
+                                if doc_id in doc_map:
+                                    matching_stickers.append(doc_map[doc_id])
                 except Exception:
                     continue
 
