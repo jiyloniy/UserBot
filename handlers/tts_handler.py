@@ -40,7 +40,10 @@ class TTSHandler:
 
     async def _handle_tts(self, event: events.NewMessage.Event) -> None:
         """TTS buyrug'ini qayta ishlaydi."""
-        text = event.message.text[len(self.COMMAND_PREFIX):].strip()
+        # Pattern: .tts <matn> — prefixdan keyingi hamma narsa matn
+        raw = event.message.text or ""
+        # ".tts" dan keyingi barcha matnni olish
+        text = raw.split(None, 1)[1] if len(raw.split(None, 1)) > 1 else ""
 
         if not text:
             await event.edit("⚠️ Matn kiriting: `.tts Salom dunyo`")

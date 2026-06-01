@@ -9,6 +9,7 @@ Foydalanish:
 import logging
 import os
 import tempfile
+import uuid
 from typing import Optional
 
 import aiohttp
@@ -76,7 +77,7 @@ async def text_to_speech(
             ) as resp:
                 if resp.status == 200:
                     temp_dir = tempfile.gettempdir()
-                    file_path = os.path.join(temp_dir, f"tts_{os.getpid()}_{id(text)}.mp3")
+                    file_path = os.path.join(temp_dir, f"tts_{uuid.uuid4().hex}.mp3")
                     with open(file_path, "wb") as f:
                         async for chunk in resp.content.iter_chunked(8192):
                             f.write(chunk)
