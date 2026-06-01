@@ -44,8 +44,9 @@ class Config:
 
     # ── OpenAI ───────────────────────────────────────────────────
     OPENAI_API_KEY: str = field(default_factory=lambda: _env_str("OPENAI_API_KEY"))
-    GPT_MODEL: str = field(default_factory=lambda: _env_str("GPT_MODEL", "gpt-4o"))
+    GPT_MODEL: str = field(default_factory=lambda: _env_str("GPT_MODEL", "gpt-4.1"))
     GPT_MAX_TOKENS: int = field(default_factory=lambda: _env_int("GPT_MAX_TOKENS", 500))
+    STT_MODEL: str = field(default_factory=lambda: _env_str("STT_MODEL", "gpt-4o-transcribe"))
 
     # ── ElevenLabs TTS ───────────────────────────────────────────
     ELEVENLABS_API_KEY: str = field(default_factory=lambda: _env_str("ELEVENLABS_API_KEY"))
