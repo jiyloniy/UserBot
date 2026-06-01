@@ -22,6 +22,7 @@ from telethon.sessions import StringSession
 from config import Config
 from handlers.ai_handler import AIHandler
 from handlers.message_handler import MessageHandler
+from handlers.session_handler import SessionHandler
 from handlers.tts_handler import TTSHandler
 from utils.context_manager import ContextManager
 from utils.logger import setup_logger
@@ -110,6 +111,10 @@ async def main() -> None:
         # TTS handler — .tts buyrug'i uchun
         tts_handler = TTSHandler(client=client, config=config)
         tts_handler.register()
+
+        # Session handler — .sessions va .cleansessions buyruqlari uchun
+        session_handler = SessionHandler(client=client, config=config)
+        session_handler.register()
 
         # Kiruvchi barcha yangi xabarlarni ushlaydi
         @client.on(events.NewMessage(incoming=True))
