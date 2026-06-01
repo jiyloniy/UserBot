@@ -33,6 +33,8 @@ from telethon.tl.types import (
     MessageMediaPhoto,
 )
 
+from prompts.system_prompt import get_system_prompt
+
 if TYPE_CHECKING:
     from config import Config
     from handlers.ai_handler import AIHandler
@@ -163,8 +165,36 @@ class MessageHandler:
                 logger.warning(f"Chat {chat_id}: AI bo'sh javob qaytardi")
                 return
 
-            # Xabar yuborish
-            await event.reply(response)
+            # Xabar yuborish — agar user voice jo'natgan bo'lsa, voice bilan javob ber
+            if is_voice and self.config.ELEVENLABS_API_KEY:
+                from utils.text_to_speech import text_to_speech
+                import os
+                tts_path = await text_to_speech(
+                    text=response,
+                    api_key=self.config.ELEVENLABS_API_KEY,
+                    voice_id=self.config.ELEVENLABS_VOICE_ID,
+                )
+                if tts_path and os.path.exists(tts_path):
+                    try:
+                        await self.client.send_file(
+                            event.chat_id,
+                            tts_path,
+                            voice_note=True,
+                            reply_to=event.message.id,
+                        )
+                    except Exception as exc:
+                        logger.warning(f"Voice javob yuborishda xato: {exc}, matn sifatida yuboriladi")
+                        await event.reply(response)
+                    finally:
+                        try:
+                            os.remove(tts_path)
+                        except OSError:
+                            pass
+                else:
+                    # TTS ishlamasa matn sifatida yuborish
+                    await event.reply(response)
+            else:
+                await event.reply(response)
 
             # Holat yangilash
             self.rl.mark_responded(chat_id)
