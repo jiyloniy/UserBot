@@ -47,6 +47,10 @@ class Config:
     GPT_MODEL: str = field(default_factory=lambda: _env_str("GPT_MODEL", "gpt-4o"))
     GPT_MAX_TOKENS: int = field(default_factory=lambda: _env_int("GPT_MAX_TOKENS", 500))
 
+    # ── ElevenLabs TTS ───────────────────────────────────────────
+    ELEVENLABS_API_KEY: str = field(default_factory=lambda: _env_str("ELEVENLABS_API_KEY"))
+    ELEVENLABS_VOICE_ID: str = field(default_factory=lambda: _env_str("ELEVENLABS_VOICE_ID", "JBFqnCBsd6RMkjVDRZzb"))
+
     # ── Shaxsiy ma'lumotlar ───────────────────────────────────────
     OWNER_NAME: str = "Erkinjon Olimov"
     OWNER_CONTACT: str = "+998888150424"
