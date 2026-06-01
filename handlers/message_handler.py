@@ -173,6 +173,7 @@ class MessageHandler:
                     text=response,
                     api_key=self.config.ELEVENLABS_API_KEY,
                     voice_id=self.config.ELEVENLABS_VOICE_ID,
+                    model_id=self.config.ELEVENLABS_MODEL_ID,
                     auto_enhance=self.config.ELEVENLABS_AUTO_ENHANCE,
                     openai_api_key=self.config.OPENAI_API_KEY,
                 )
