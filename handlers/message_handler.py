@@ -34,6 +34,7 @@ from telethon.tl.types import (
 )
 
 from prompts.system_prompt import get_system_prompt
+from handlers.chat_enhancer import ChatEnhancer
 
 if TYPE_CHECKING:
     from config import Config
@@ -58,6 +59,7 @@ class MessageHandler:
         self.ai = ai_handler
         self.ctx = context_manager
         self.rl = rate_limiter
+        self.enhancer = ChatEnhancer(client, config)
         self._me_id: Optional[int] = None
         self._me_username: Optional[str] = None
 
@@ -197,7 +199,19 @@ class MessageHandler:
                     # TTS ishlamasa matn sifatida yuborish
                     await event.reply(response)
             else:
-                await event.reply(response)
+                # Media tokenlarni qayta ishlash (GIF, stiker, rasm)
+                clean_text, media_sent = await self.enhancer.process_response(
+                    chat_id=event.chat_id,
+                    response=response,
+                    reply_to=event.message.id,
+                )
+
+                # Agar matn ham bor bo'lsa — yuborish
+                if clean_text:
+                    await event.reply(clean_text)
+                elif not media_sent:
+                    # Media ham, matn ham yo'q — original javobni yuborish
+                    await event.reply(response)
 
             # Holat yangilash
             self.rl.mark_responded(chat_id)
