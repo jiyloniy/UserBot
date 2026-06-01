@@ -105,7 +105,7 @@ class MessageHandler:
                     history = self.ctx.get_history(chat_id)
                     user_text = await gpt4o_audio_chat(
                         api_key=self.config.OPENAI_API_KEY,
-                        model=self.config.GPT_MODEL,
+                        model='gpt-realtime-whisper',
                         audio_path=file_path,
                         system_prompt=system_prompt,
                         history=history,

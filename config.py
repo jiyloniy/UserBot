@@ -54,8 +54,8 @@ class Config:
     ELEVENLABS_AUTO_ENHANCE: bool = field(default_factory=lambda: _env_bool("ELEVENLABS_AUTO_ENHANCE", True))
 
     # ── Shaxsiy ma'lumotlar ───────────────────────────────────────
-    OWNER_NAME: str = "Erkinjon Olimov"
-    OWNER_CONTACT: str = "+998888150424"
+    OWNER_NAME: str = "Yusufjonov Qodirxon"
+    OWNER_CONTACT: str = "+998500049297"
     COMPANY_NAME: str = "VodiySoft"
     COMPANY_ROLE: str = "Sotuv Bo'limi Boshlig'i"
 

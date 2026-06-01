@@ -1,6 +1,6 @@
 """
 VodiySoft UserBot — Asosiy ishga tushirish fayli
-Erkinjon Olimov | Sotuv Bo'limi Boshlig'i | VodiySoft Company
+Yusufjonov Qodirxon | Sotuv Bo'limi Boshlig'i | VodiySoft Company
 
 Ishga tushirish:
     python main.py
