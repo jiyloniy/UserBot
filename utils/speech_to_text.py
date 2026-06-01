@@ -36,8 +36,8 @@ async def speech_to_text(file_path: str, api_key: str) -> Optional[str]:
         "model": "whisper-1",
         "response_format": "text",
     }
-    # Fallback: tilni majburan en yoki ru qilish
-    fallback_languages = ["uz", "uzb", "uzbek", "ru", "en"]
+    # Avval tilsiz (auto-detect), keyin uz, keyin ru, keyin en
+    fallback_languages = ["auto", "uz", "ru", "en"]
     for lang in fallback_languages:
         try:
             form = aiohttp.FormData()
@@ -45,14 +45,16 @@ async def speech_to_text(file_path: str, api_key: str) -> Optional[str]:
                 form.add_field("file", f, filename=os.path.basename(file_path), content_type=content_type)
                 for k, v in data.items():
                     form.add_field(k, v)
-                # Avval tilsiz, keyin ru, keyin en
-                if lang != "uz":
+                # auto = tilsiz yuborish (Whisper o'zi aniqlaydi)
+                if lang != "auto":
                     form.add_field("language", lang)
                 async with aiohttp.ClientSession() as session:
                     async with session.post(OPENAI_WHISPER_URL, headers=headers, data=form, timeout=60) as resp:
                         if resp.status == 200:
                             text = await resp.text()
-                            return text.strip()
+                            text = text.strip()
+                            if text:
+                                return text
                         else:
                             err = await resp.text()
                             logger.error(f"Whisper API xato: {resp.status} — {err} (lang={lang})")
