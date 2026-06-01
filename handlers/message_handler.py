@@ -4,8 +4,8 @@ MessageHandler — Telegram xabarlarini qayta ishlaydi.
 Javob berish mantiqи:
   • Shaxsiy chat (private)     → doim javob beradi (rate limit bilan)
   • Guruh / kanal kommentlari  → faqat:
-        a) @mention bo'lsa
-        b) bizning xabarimizga reply bo'lsa
+        a) @mention (tag) bo'lsa
+        b) faqat bizning o'z xabarimizga reply bo'lsa
   • O'z xabarlari              → o'tkazib yuboradi
   • Botlar                     → o'tkazib yuboradi
   • Bloklangan foydalanuvchi   → tinch o'tkazadi
@@ -229,9 +229,15 @@ class MessageHandler:
             if event.message.mentioned:
                 return True
 
-            # Istalgan reply'ga javob berish
+            # Faqat bizning xabarimizga reply bo'lsa javob berish
             if event.message.reply_to:
-                return True
+                try:
+                    replied = await event.message.get_reply_message()
+                    if replied and replied.sender_id == self._me_id:
+                        return True
+                except Exception:
+                    pass
+                return False
 
             return False
 
