@@ -98,33 +98,13 @@ class MessageHandler:
                 temp_dir = tempfile.gettempdir()
                 file_path = os.path.join(temp_dir, f"voice_{msg.id}.ogg")
                 await self.client.download_media(msg, file_path)
-                # Model nomi multimodal bo'lsa — audio faylni to'g'ridan-to'g'ri yuboramiz
-                model_name = self.config.GPT_MODEL.lower()
-                if any(x in model_name for x in ["audio", "tts", "gpt-4o"]):
-                    from handlers.openai_audio_helper import gpt4o_audio_chat
-                    chat_name, chat_type = await self._get_chat_info(event)
-                    system_prompt = self.ai.config.OWNER_NAME + ": " + get_system_prompt(chat_name, chat_type)
-                    history = self.ctx.get_history(chat_id)
-                    user_text = await gpt4o_audio_chat(
-                        api_key=self.config.OPENAI_API_KEY,
-                        model='gpt-realtime-whisper',
-                        audio_path=file_path,
-                        system_prompt=system_prompt,
-                        history=history,
-                        max_tokens=self.config.GPT_MAX_TOKENS,
-                    )
-                    if not user_text:
-                        logger.warning(f"Chat {chat_id}: GPT-4o audio input javob bermadi")
-                        return
-                    logger.info(f"Chat {chat_id}: GPT-4o audio javobi: {user_text}")
-                else:
-                    # Standart: Whisper orqali matnga o‘girish
-                    from utils.speech_to_text import speech_to_text
-                    user_text = await speech_to_text(file_path, self.config.OPENAI_API_KEY)
-                    if not user_text:
-                        logger.warning(f"Chat {chat_id}: Ovozli xabarni matnga o‘girishda xato")
-                        return
-                    logger.info(f"Chat {chat_id}: Ovozli xabar matni: {user_text}")
+                # gpt-4o-transcribe — eng kuchli STT model
+                from utils.speech_to_text import speech_to_text
+                user_text = await speech_to_text(file_path, self.config.OPENAI_API_KEY, model=self.config.STT_MODEL)
+                if not user_text:
+                    logger.warning(f"Chat {chat_id}: Ovozli xabarni matnga o'girishda xato (gpt-4o-transcribe)")
+                    return
+                logger.info(f"Chat {chat_id}: Ovozli xabar matni: {user_text}")
                 try:
                     os.remove(file_path)
                 except Exception:
