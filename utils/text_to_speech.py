@@ -23,7 +23,7 @@ async def text_to_speech(
     text: str,
     api_key: str,
     voice_id: str = "JBFqnCBsd6RMkjVDRZzb",
-    model_id: str = "eleven_multilingual_v2",
+    model_id: str = "eleven_v3",
     output_format: str = "mp3_44100_128",
     auto_enhance: bool = False,
     openai_api_key: str = "",
@@ -35,7 +35,7 @@ async def text_to_speech(
         text: Ovozga aylantiriladigan matn
         api_key: ElevenLabs API kaliti
         voice_id: Ovoz identifikatori (default: George)
-        model_id: TTS model (default: eleven_multilingual_v2)
+        model_id: TTS model (default: eleven_v3)
         output_format: Audio format (default: mp3_44100_128)
         auto_enhance: True bo'lsa — matnni speech taglar bilan boyitadi
         openai_api_key: Auto-enhance uchun OpenAI API kaliti
@@ -64,15 +64,20 @@ async def text_to_speech(
         "Accept": "audio/mpeg",
     }
 
+    # eleven_v3 modeli uchun optimallashtirilgan sozlamalar
+    voice_settings = {
+        "stability": 0.5,
+        "similarity_boost": 0.75,
+    }
+    # v3 modelida style va use_speaker_boost qo'llab-quvvatlanmaydi
+    if model_id != "eleven_v3":
+        voice_settings["style"] = 0.0
+        voice_settings["use_speaker_boost"] = True
+
     payload = {
         "text": text,
         "model_id": model_id,
-        "voice_settings": {
-            "stability": 0.5,
-            "similarity_boost": 0.75,
-            "style": 0.0,
-            "use_speaker_boost": True,
-        },
+        "voice_settings": voice_settings,
     }
 
     try:

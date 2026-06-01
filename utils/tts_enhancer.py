@@ -1,14 +1,15 @@
 """
-TTS Auto-Enhance — matnni ElevenLabs speech taglar bilan boyitadi.
+TTS Auto-Enhance — matnni ElevenLabs v3 model uchun boyitadi.
 
-ElevenLabs qo'llab-quvvatlaydigan taglar:
-  [laughs], [chuckles], [sighs], [gasps], [clears throat],
-  [speaking slowly], [speaking quickly], [thoughtful], [excited],
-  [whispers], [sad], [serious], [angry], [surprised]
+ElevenLabs v3 qo'llab-quvvatlaydigan kreativ boshqaruv usullari:
+  - Emotsiya: matn konteksti orqali (masalan: "he said excitedly")
+  - Pauza: "..." yoki "—" yoki yangi qator orqali
+  - Tezlik: matn oqimi va tinish belgilari orqali
+  - Ovoz effektlari: <sfx> tagi orqali
+  - Ko'p nutqchi: dialog formati orqali
 
-Bu modul GPT orqali matnni tahlil qilib, mos joylarga
-tabiiy speech taglarni qo'shadi — natijada ovoz yanada
-hayotiy va emotsional chiqadi.
+MUHIM: v3 modelida SSML break taglar QOLLAB-QUVVATLANMAYDI.
+Buning o'rniga matn asosidagi boshqaruv ishlatiladi.
 """
 from __future__ import annotations
 
@@ -20,37 +21,52 @@ from openai import AsyncOpenAI
 
 logger = logging.getLogger("vodiysoftbot.tts_enhancer")
 
-# ElevenLabs tomonidan qo'llab-quvvatlanadigan speech taglar
-ELEVENLABS_TAGS = [
+# ElevenLabs v3 tomonidan qo'llab-quvvatlanadigan kreativ taglar va usullar
+ELEVENLABS_V3_TAGS = [
     "[laughs]", "[chuckles]", "[sighs]", "[gasps]",
     "[clears throat]", "[speaking slowly]", "[speaking quickly]",
     "[thoughtful]", "[excited]", "[whispers]", "[sad]",
     "[serious]", "[angry]", "[surprised]",
 ]
 
-ENHANCE_SYSTEM_PROMPT = """Sen matnni ElevenLabs TTS uchun boyituvchi yordamchisan.
+ENHANCE_SYSTEM_PROMPT = """Sen matnni ElevenLabs v3 TTS uchun boyituvchi yordamchisan.
 
-Vazifang: berilgan matnni tabiiy va emotsional qilib ElevenLabs speech taglar bilan boyitish.
+Vazifang: berilgan matnni tabiiy va emotsional qilib v3 modeliga mos usullar bilan boyitish.
 
+== EMOTSIYA va TON BOSHQARUVI ==
 Qo'llash mumkin bo'lgan taglar:
 [laughs], [chuckles], [sighs], [gasps], [clears throat],
 [speaking slowly], [speaking quickly], [thoughtful], [excited],
 [whispers], [sad], [serious], [angry], [surprised]
 
+== PAUZA BOSHQARUVI (v3 uchun) ==
+- Qisqa pauza: "..." (uch nuqta)
+- O'rta pauza: "—" (tire)
+- Uzun pauza: yangi qator (\\n)
+MUHIM: SSML <break> tagi ISHLAMAYDI! Faqat yuqoridagi usullarni ishlat.
+
+== TEZLIK va RITM ==
+- Sekin o'qish: vergullar va nuqtalar ko'proq qo'y
+- Tez o'qish: qisqa gaplar, kam tinish belgilari
+
+== OVOZ EFFEKTLARI ==
+- Fon ovozlari uchun: <sfx>tavsif</sfx> (masalan: <sfx>crowd cheering</sfx>)
+
 QOIDALAR:
-1. Matn ma'nosini O'ZGARTIRMA — faqat taglar qo'sh
+1. Matn ma'nosini O'ZGARTIRMA — faqat taglar va tinish belgilari qo'sh
 2. Taglarni tabiiy joylarga qo'y (gap boshida, vergul/nuqta oldidan)
 3. Haddan ziyod tag qo'yma — har 1-2 gapda 1 ta yetarli
 4. Kontekstga mos tag tanlash — xursand gap = [excited]/[chuckles], o'ylanish = [thoughtful]
 5. Qisqa matnlarga (5 so'zdan kam) tag qo'yma
 6. FAQAT boyitilgan matnni qaytar — hech qanday izoh yoki tushuntirish qo'shma
+7. Pauzalar uchun "..." va "—" ishlatish — SSML ishlatma!
 
 Misol:
 Kirish: "Jigarim, bu loyihada qiziq narsa bor. Toshkentdagi kompaniya bilan ishladik, natija zo'r bo'ldi."
-Chiqish: "[thoughtful] Jigarim, bu loyihada qiziq narsa bor. [excited] Toshkentdagi kompaniya bilan ishladik, natija zo'r bo'ldi."
+Chiqish: "[thoughtful] Jigarim, bu loyihada qiziq narsa bor... [excited] Toshkentdagi kompaniya bilan ishladik — natija zo'r bo'ldi."
 
 Kirish: "Ha, tushundim. Keling ertaga gaplashamiz."
-Chiqish: "Ha, tushundim. [speaking slowly] Keling ertaga gaplashamiz."
+Chiqish: "Ha, tushundim... [speaking slowly] Keling — ertaga gaplashamiz."
 """
 
 
@@ -77,7 +93,7 @@ async def enhance_text_for_tts(
         return text
 
     # Agar matnda allaqachon taglar bo'lsa — qayta boyitmaslik
-    if any(tag in text for tag in ELEVENLABS_TAGS):
+    if any(tag in text for tag in ELEVENLABS_V3_TAGS):
         return text
 
     try:
@@ -112,14 +128,14 @@ async def enhance_text_for_tts(
 
 def _sanitize_tags(text: str) -> str:
     """
-    Faqat ruxsat etilgan ElevenLabs taglarni qoldiradi,
+    Faqat ruxsat etilgan ElevenLabs v3 taglarni qoldiradi,
     noto'g'ri taglarni olib tashlaydi.
     """
     # Barcha [...] formatdagi taglarni topish
     all_tags = re.findall(r"\[[^\]]+\]", text)
 
     for tag in all_tags:
-        if tag.lower() not in [t.lower() for t in ELEVENLABS_TAGS]:
+        if tag.lower() not in [t.lower() for t in ELEVENLABS_V3_TAGS]:
             text = text.replace(tag, "")
 
     # Ortiqcha bo'sh joylarni tozalash
